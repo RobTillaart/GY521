@@ -9,9 +9,10 @@ Experimental library for GY521 a.k.a. MCU-6050
 Library is work in progress, in fact extracted and extended from an old project.
 It needs to be tested a lot more.
 
-It has two examples
+It has three examples
 - calibration example to determine the offsets needed
 - example to read values.
+- test sketch to test get / set values.
 
 ## Calibration (short version for now)
 

@@ -19,9 +19,11 @@ void setup()
   Wire.begin();
 
   delay(100);
-  if (sensor.wakeup() == false)
+  while (sensor.wakeup() == false)
   {
-    Serial.println("Could not conect to GY521");
+    Serial.print(millis());
+    Serial.println("\tCould not connect to GY521");
+    delay(1000);
   }
   sensor.setAccelSensitivity(0);  // 2g
   sensor.setGyroSensitivity(0);   // 250 degrees/s
