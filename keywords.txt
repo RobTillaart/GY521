@@ -12,6 +12,7 @@ setThrottle	KEYWORD2
 getThrottle	KEYWORD2
 
 setAccelSensitivity	KEYWORD2
+getAccelSensitivity	KEYWORD2
 getAccelX	KEYWORD2
 getAccelY	KEYWORD2
 getAccelZ	KEYWORD2
@@ -21,6 +22,7 @@ getAngleZ	KEYWORD2
 getTemperature	KEYWORD2
 
 setGyroSensitivity	KEYWORD2
+getGyroSensitivity	KEYWORD2
 getGyroX	KEYWORD2
 getGyroY	KEYWORD2
 getGyroZ	KEYWORD2

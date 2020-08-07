@@ -1,15 +1,15 @@
 //
 //    FILE: GY521.cpp
 //  AUTHOR: Rob Tillaart
-// VERSION: 0.1.1
+// VERSION: 0.1.2
 // PURPOSE: Arduino library for I2C GY521 accelerometer-gyroscope sensor
 //     URL: https://github.com/RobTillaart/GY521
 //
 // HISTORY:
 // 0.1.0    2017-11-20 initial version
 // 0.1.1    2020-07-09 refactor + initial release
+// 0.1.2    2020-08-06 fix setAccelSensitivity + add getters
 
-#include "Wire.h"
 #include "GY521.h"
 
 // keep names in sync with BIG MPU6050 lib
@@ -32,8 +32,8 @@
 //
 GY521::GY521(uint8_t address)
 {
-  _address = 0x69;
-  if (address == 0x68) _address = 0x68;
+  _address = address;
+  setThrottleTime(GY521_THROTTLE_TIME);
 }
 
 bool GY521::wakeup()
@@ -44,12 +44,14 @@ bool GY521::wakeup()
   return Wire.endTransmission() == 0;
 }
 
-
 int GY521::read()
 {
   if (_throttle)
   {
-    if ((millis() - _lastTime) < GY521_THROTTLE_TIME) return GY521_THROTTLED;
+    if ((millis() - _lastTime) < _throttleTime)
+    {
+      return GY521_THROTTLED;
+    }
   }
 
   // Connected ?
@@ -116,15 +118,25 @@ int GY521::read()
 
 void GY521::setAccelSensitivity(uint8_t as)
 {
-  if (as > 3) as = 3;
+  _afs = as;
+  if (_afs > 3) _afs = 3;
   uint8_t val = getRegister(GY521_ACCEL_CONFIG);
-  val &= 0xE7;
-  val |= (as << 3);
-  setRegister(GY521_ACCEL_CONFIG, val);
+  // no need to write same value
+  if (((val >> 3) & 3) != _afs)
+  {
+    val &= 0xE7;
+    val |= (_afs << 3);
+    setRegister(GY521_ACCEL_CONFIG, val);
+  }
   // calculate conversion factor.
-  _raw2g = 16384.0;
-  for (uint8_t i = 0; i < _afs; i++) _raw2g *= 0.5;
-  _raw2g = 1.0 / _raw2g;
+  _raw2g = (1 << _afs) / 16384.0;
+}
+
+uint8_t GY521::getAccelSensitivity()
+{
+  uint8_t val = getRegister(GY521_ACCEL_CONFIG);
+  _afs = (val >> 3) & 3;
+  return _afs;
 }
 
 void  GY521::setGyroSensitivity(uint8_t gs)
@@ -132,12 +144,22 @@ void  GY521::setGyroSensitivity(uint8_t gs)
   _gfs = gs;
   if (_gfs > 3) _gfs = 3;
   uint8_t val = getRegister(GY521_GYRO_CONFIG);
-  val &= 0xE7;
-  val |= (_gfs << 3);
-  setRegister(GY521_GYRO_CONFIG, val);
-    _raw2dps = 131.0;
-  for (uint8_t i = 0; i < _gfs; i++) _raw2dps *= 0.5;
-  _raw2dps = 1.0 / _raw2dps;
+  // no need to write same value
+  if (((val >> 3) & 3) != _gfs)
+  {
+    val &= 0xE7;
+    val |= (_gfs << 3);
+    setRegister(GY521_GYRO_CONFIG, val);
+  }
+  // calculate conversion factor.
+  _raw2dps = (1 << _gfs) / 131.0;
+}
+
+uint8_t GY521::getGyroSensitivity()
+{
+  uint8_t val = getRegister(GY521_GYRO_CONFIG);
+  _gfs = (val >> 3) & 3;
+  return _gfs;
 }
 
 uint8_t GY521::setRegister(uint8_t reg, uint8_t value)
