@@ -134,7 +134,7 @@ void GY521::setAccelSensitivity(uint8_t as)
 
 uint8_t GY521::getAccelSensitivity()
 {
-  uint8_t val = getRegister(GY521_GYRO_CONFIG);
+  uint8_t val = getRegister(GY521_ACCEL_CONFIG);
   _afs = (val >> 3) & 3;
   return _afs;
 }
