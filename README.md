@@ -17,20 +17,22 @@ It has three examples
 ## Calibration (short version for now)
 
 1. load and run calibration example  
-   it shows a header containing 6 numbers and 10 lines og 8 numbers
-1. wait until the middle 6 of the longer lines stabilize (should be all 0)
+   it shows a header containing 6 numbers and 10 lines of 8 numbers
+1. wait until the middle 6 of the longer lines stabilize (should all be 0)
 1. copy the 6 numbers above the axe aye aze as these are the numbers needed.
 
 
 ## Future
 
+**Should**
 - test test and test ...(ESP too)
-- pitch roll yaw example
-- better documentation
-- look for math optimizations  (atan/hypot)
-- calibrate function in the lib ?
-- ESP wire support (other pins)
-- ...
+- improve documentation
+- look for math optimizations  (atan, hypot, performance)
+
+**Could**
+- calibrate function in the lib ?  (think not as lib might grow?)
+- calibrate sketch could print code snippet to include...
+
 
 ## documents
 
