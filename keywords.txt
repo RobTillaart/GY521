@@ -1,9 +1,7 @@
 # Syntax Coloring Map for GY521
 
-
 # Datatypes (KEYWORD1)
 GY521	KEYWORD1
-
 
 # Methods and Functions (KEYWORD2)
 wakeup	KEYWORD2

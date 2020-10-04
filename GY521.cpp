@@ -1,7 +1,7 @@
 //
 //    FILE: GY521.cpp
 //  AUTHOR: Rob Tillaart
-// VERSION: 0.1.4
+// VERSION: 0.1.5
 // PURPOSE: Arduino library for I2C GY521 accelerometer-gyroscope sensor
 //     URL: https://github.com/RobTillaart/GY521
 //
@@ -10,7 +10,8 @@
 // 0.1.1    2020-07-09 refactor + initial release
 // 0.1.2    2020-08-06 fix setAccelSensitivity + add getters
 // 0.1.3    2020-08-07 fix ESP support + pitch roll yaw demo
-// 0.1.4    2020-09-29 fix #5
+// 0.1.4    2020-09-29 fix #5 missing ;
+// 0.1.5    2020-09-29 fix #6 fix math for Teensy
 
 
 #include "GY521.h"
@@ -67,7 +68,7 @@ bool GY521::wakeup()
   return Wire.endTransmission() == 0;
 }
 
-int GY521::read()
+int16_t GY521::read()
 {
   if (_throttle)
   {
@@ -80,20 +81,21 @@ int GY521::read()
   // Connected ?
   Wire.beginTransmission(_address);
   Wire.write(GY521_ACCEL_XOUT_H);
-  if (Wire.endTransmission() != 0) return GY521_ERROR_READ;
+  if (Wire.endTransmission() != 0) return GY521_ERROR_WRITE;
 
   // Get the data
-  Wire.requestFrom(_address, (uint8_t)14);
+  int8_t n = Wire.requestFrom(_address, (uint8_t)14);
+  if (n != 14) return GY521_ERROR_READ;
   // ACCELEROMETER
-  _ax = ( ( ((int)Wire.read()) << 8) | Wire.read() );  // ACCEL_XOUT_H  ACCEL_XOUT_L
-  _ay = ( ( ((int)Wire.read()) << 8) | Wire.read() );  // ACCEL_YOUT_H  ACCEL_YOUT_L
-  _az = ( ( ((int)Wire.read()) << 8) | Wire.read() );  // ACCEL_ZOUT_H  ACCEL_ZOUT_L
+  _ax = _WireRead2();  // ACCEL_XOUT_H  ACCEL_XOUT_L
+  _ay = _WireRead2();  // ACCEL_YOUT_H  ACCEL_YOUT_L
+  _az = _WireRead2();  // ACCEL_ZOUT_H  ACCEL_ZOUT_L
   // TEMPERATURE
-  _temperature = ( ((int)Wire.read()) << 8) | Wire.read();  // TEMP_OUT_H    TEMP_OUT_L
+  _temperature = _WireRead2(); // TEMP_OUT_H    TEMP_OUT_L
   // GYROSCOPE
-  _gx = (( ((int)Wire.read()) << 8) | Wire.read());  // GYRO_XOUT_H   GYRO_XOUT_L
-  _gy = (( ((int)Wire.read()) << 8) | Wire.read());  // GYRO_YOUT_H   GYRO_YOUT_L
-  _gz = (( ((int)Wire.read()) << 8) | Wire.read());  // GYRO_ZOUT_H   GYRO_ZOUT_L
+  _gx = _WireRead2();  // GYRO_XOUT_H   GYRO_XOUT_L
+  _gy = _WireRead2();  // GYRO_YOUT_H   GYRO_YOUT_L
+  _gz = _WireRead2();  // GYRO_ZOUT_H   GYRO_ZOUT_L
 
   // time interval
   uint32_t now = millis();
@@ -200,9 +202,19 @@ uint8_t GY521::getRegister(uint8_t reg)
   Wire.beginTransmission(_address);
   Wire.write(reg);
   if (Wire.endTransmission() != 0) return GY521_ERROR_WRITE;
-  Wire.requestFrom(_address, (uint8_t) 1);
+  uint8_t n = Wire.requestFrom(_address, (uint8_t) 1);
+  if (n != 1) return GY521_ERROR_READ;
   uint8_t val = Wire.read();
   return val;
 }
 
-// END OF FILE
+// to read register of 2 bytes.
+int16_t GY521::_WireRead2()
+{
+  int16_t tmp = Wire.read();
+  tmp <<= 8;
+  tmp |= Wire.read();
+  return tmp;
+}
+
+// -- END OF FILE --
