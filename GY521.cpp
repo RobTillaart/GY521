@@ -1,7 +1,7 @@
 //
 //    FILE: GY521.cpp
 //  AUTHOR: Rob Tillaart
-// VERSION: 0.1.5
+// VERSION: 0.2.0
 // PURPOSE: Arduino library for I2C GY521 accelerometer-gyroscope sensor
 //     URL: https://github.com/RobTillaart/GY521
 //
@@ -12,6 +12,7 @@
 // 0.1.3    2020-08-07 fix ESP support + pitch roll yaw demo
 // 0.1.4    2020-09-29 fix #5 missing ;
 // 0.1.5    2020-09-29 fix #6 fix math for Teensy
+// 0.2.0    2020-11-03 improve error handling
 
 
 #include "GY521.h"
@@ -57,7 +58,7 @@ bool GY521::begin()
 bool GY521::isConnected()
 {
   Wire.beginTransmission(_address);
-  return Wire.endTransmission() == 0;
+  return (Wire.endTransmission() == 0);
 }
 
 bool GY521::wakeup()
@@ -65,7 +66,7 @@ bool GY521::wakeup()
   Wire.beginTransmission(_address);
   Wire.write(GY521_PWR_MGMT_1);
   Wire.write(GY521_WAKEUP);
-  return Wire.endTransmission() == 0;
+  return (Wire.endTransmission() == 0);
 }
 
 int16_t GY521::read()
@@ -118,7 +119,7 @@ int16_t GY521::read()
   _aaz += aze;
 
   // Convert to Celsius
-  _temperature = (_temperature + 12412.0) * 0.00294117647;  //  == /340.0  + 36.53;
+  _temperature = _temperature * 0.00294117647 + 36.53;  //  == /340.0  + 36.53;
 
   // Convert raw Gyro to degrees/seconds
   _gx *= _raw2dps;
@@ -141,48 +142,72 @@ int16_t GY521::read()
   return GY521_OK;
 }
 
-void GY521::setAccelSensitivity(uint8_t as)
+bool GY521::setAccelSensitivity(uint8_t as)
 {
   _afs = as;
   if (_afs > 3) _afs = 3;
   uint8_t val = getRegister(GY521_ACCEL_CONFIG);
+  if (_error != 0)
+  {
+    return false;
+  }
   // no need to write same value
   if (((val >> 3) & 3) != _afs)
   {
     val &= 0xE7;
     val |= (_afs << 3);
-    setRegister(GY521_ACCEL_CONFIG, val);
+    if (setRegister(GY521_ACCEL_CONFIG, val) != GY521_OK)
+    {
+      return false;
+    }
   }
   // calculate conversion factor.
   _raw2g = (1 << _afs) / 16384.0;
+  return true;
 }
 
 uint8_t GY521::getAccelSensitivity()
 {
   uint8_t val = getRegister(GY521_ACCEL_CONFIG);
+  if (_error != GY521_OK)
+  {
+    return _error; // return and propagate error (best thing to do)
+  }
   _afs = (val >> 3) & 3;
   return _afs;
 }
 
-void  GY521::setGyroSensitivity(uint8_t gs)
+bool GY521::setGyroSensitivity(uint8_t gs)
 {
   _gfs = gs;
   if (_gfs > 3) _gfs = 3;
   uint8_t val = getRegister(GY521_GYRO_CONFIG);
+  if (_error != 0)
+  {
+    return false;
+  }
   // no need to write same value
   if (((val >> 3) & 3) != _gfs)
   {
     val &= 0xE7;
     val |= (_gfs << 3);
-    setRegister(GY521_GYRO_CONFIG, val);
+    if (setRegister(GY521_GYRO_CONFIG, val) != GY521_OK)
+    {
+      return false;
+    }
   }
   // calculate conversion factor.
   _raw2dps = (1 << _gfs) / 131.0;
+  return true;
 }
 
 uint8_t GY521::getGyroSensitivity()
 {
   uint8_t val = getRegister(GY521_GYRO_CONFIG);
+  if (_error != GY521_OK)
+  {
+    return _error; // return and propagate error (best thing to do)
+  }
   _gfs = (val >> 3) & 3;
   return _gfs;
 }
@@ -193,7 +218,11 @@ uint8_t GY521::setRegister(uint8_t reg, uint8_t value)
   Wire.write(reg);
   Wire.write(value);
   // no need to do anything if not connected.
-  if (Wire.endTransmission() != 0) return GY521_ERROR_WRITE;
+  if (Wire.endTransmission() != 0) 
+  {
+    _error = GY521_ERROR_WRITE;
+    return _error;
+  }
   return GY521_OK;
 }
 
@@ -201,9 +230,17 @@ uint8_t GY521::getRegister(uint8_t reg)
 {
   Wire.beginTransmission(_address);
   Wire.write(reg);
-  if (Wire.endTransmission() != 0) return GY521_ERROR_WRITE;
+  if (Wire.endTransmission() != 0)
+  {
+    _error = GY521_ERROR_WRITE;
+    return _error;
+  }
   uint8_t n = Wire.requestFrom(_address, (uint8_t) 1);
-  if (n != 1) return GY521_ERROR_READ;
+  if (n != 1) 
+  {
+    _error = GY521_ERROR_READ;
+    return _error;
+  }
   uint8_t val = Wire.read();
   return val;
 }
