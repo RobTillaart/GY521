@@ -56,6 +56,45 @@ unittest(test_new_operator)
 
 unittest(test_constructor)
 {
+  GY521 sensor(0x69);
+  fprintf(stderr, "VERSION: %s\n", GY521_LIB_VERSION);
+  sensor.begin();
+  assertEqual(GY521_OK, sensor.getError());
+
+  assertFalse(sensor.isConnected());
+}
+
+
+unittest(test_get_set)
+{
+  GY521 sensor(0x69);
+  fprintf(stderr, "VERSION: %s\n", GY521_LIB_VERSION);
+  sensor.begin();
+  assertEqual(GY521_OK, sensor.getError());
+  
+  sensor.setThrottle(true);
+  assertTrue(sensor.getThrottle());
+  sensor.setThrottle(false);
+  assertFalse(sensor.getThrottle());
+  
+  for (uint16_t ti = 1; ti != 0; ti <<= 1)
+  {
+    sensor.setThrottleTime(ti);
+    assertEqual(ti, sensor.getThrottleTime());
+  }
+
+  for (int as = 0; as < 4; as++)
+  {
+    sensor.setAccelSensitivity(as);
+    assertEqual(as, sensor.getAccelSensitivity());
+  }
+
+  for (int gs = 0; gs < 4; gs++)
+  {
+    sensor.setGyroSensitivity(gs);
+    assertEqual(gs, sensor.getGyroSensitivity());
+  }
+
   assertEqual(1, 1);
 }
 
