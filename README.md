@@ -1,3 +1,8 @@
+
+[![Arduino CI](https://github.com/RobTillaart/GY521/workflows/Arduino%20CI/badge.svg)](https://github.com/marketplace/actions/arduino_ci)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/RobTillaart/GY521/blob/master/LICENSE)
+[![GitHub release](https://img.shields.io/github/release/RobTillaart/GY521.svg?maxAge=3600)](https://github.com/RobTillaart/GY521/releases)
+
 # GY521
 
 Arduino library for I2C GY521 accelerometer-gyroscope sensor a.k.a. MCU-6050
@@ -21,7 +26,6 @@ It has three examples
 1. wait until the middle 6 of the longer lines stabilize (should all be 0)
 1. copy the 6 numbers above the axe aye aze as these are the numbers needed.
 
-
 ## Future
 
 **Should**
@@ -32,7 +36,6 @@ It has three examples
 **Could**
 - calibrate function in the lib ?  (think not as lib might grow?)
 - calibrate sketch could print code snippet to include...
-
 
 ## documents
 
