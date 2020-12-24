@@ -98,7 +98,7 @@ unittest(test_get_set)
   {
     sensor.setGyroSensitivity(gs);
     fprintf(stderr, "%d\n", sensor.getAccelSensitivity());
-    assertEqual(as, sensor.getAccelSensitivity());
+    assertEqual(gs, sensor.getAccelSensitivity());
   }
 
   assertEqual(1, 1);
