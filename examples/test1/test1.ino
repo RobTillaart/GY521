@@ -43,9 +43,9 @@ void setup()
 void loop()
 {
   sensor.read();
-  int ax = sensor.getAngleX();
-  int ay = sensor.getAngleY();
-  int az = sensor.getAngleZ();
+  int ax = sensor.getAccelX();
+  int ay = sensor.getAccelY();
+  int az = sensor.getAccelZ();
   int gx = sensor.getGyroX();
   int gy = sensor.getGyroY();
   int gz = sensor.getGyroZ();
