@@ -50,9 +50,9 @@ void loop()
   for (int i = 0; i < 20; i++)
   {
     sensor.read();
-    ax -= sensor.getAngleX();
-    ay -= sensor.getAngleY();
-    az -= sensor.getAngleZ();
+    ax -= sensor.getAccelX();
+    ay -= sensor.getAccelY();
+    az -= sensor.getAccelZ();
     gx -= sensor.getGyroX();
     gy -= sensor.getGyroY();
     gz -= sensor.getGyroZ();
