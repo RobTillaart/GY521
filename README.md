@@ -7,6 +7,7 @@
 
 Arduino library for I2C GY521 accelerometer-gyroscope sensor a.k.a. MCU-6050
 
+
 ## Description
 
 Experimental library for GY521 a.k.a. MCU-6050
@@ -19,12 +20,75 @@ It has three examples
 - example to read values.
 - test sketch to test get / set values.
 
+
 ## Calibration (short version for now)
 
 1. load and run calibration example  
    it shows a header containing 6 numbers and 10 lines of 8 numbers
 1. wait until the middle 6 of the longer lines stabilize (should all be 0)
 1. copy the 6 numbers above the axe aye aze as these are the numbers needed.
+
+
+## Interface
+
+TODO
+
+### Constructor
+
+- **GY521(uint8_t address = 0x69)** Constructor with default address. 0x68 is also valid.
+- **bool begin()**
+- **bool isConnected()** device can be found on I2C bus.
+- **bool wakeUp()**
+
+
+### Throttle
+
+- **void setThrottle(bool throttle = true)** throttle to force delay between reads.
+- **bool getThrottle()** idem
+- **void     setThrottleTime(uint16_t ti )** milliseconds, max = 65535 = 1++ minute
+- **uint16_t getThrottleTime()** idem
+
+
+### Read
+
+#### SET BEFORE READ
+  // as = 0,1,2,3 ==> 2g 4g 8g 16g
+- **bool setAccelSensitivity(uint8_t as)** as = 0, 1, 2, 3 ==> 2g 4g 8g 16g
+- **uint8_t getAccelSensitivity()** returns 0, 1, 2, 3
+- **bool setGyroSensitivity(uint8_t gs)** gs = 0,1,2,3  ==>  250, 500, 1000, 2000 degrees/second
+- **uint8_t  getGyroSensitivity()** returns 0, 1, 2, 3  
+
+
+#### Actual read
+
+- **int16_t read()** returns ...
+- **uint32_t lastTime()** last time sensor is actually read. In millis().
+
+
+#### Call after read
+
+- **float getAccelX()** idem
+- **float getAccelY()** idem
+- **float getAccelZ()** idem
+- **float getAngleX()** idem
+- **float getAngleY()** idem
+- **float getAngleZ()** idem
+- **float getTemperature()** idem
+- **float getGyroX()** idem
+- **float getGyroY()** idem
+- **float getGyroZ()** idem
+- **float getPitch()** idem
+- **float getRoll()** idem
+- **float getYaw()** idem
+
+
+### Register access
+
+Read the register PDF for the specific 
+
+- **uint8_t setRegister(uint8_t reg, uint8_t value)**
+- **uint8_t getRegister(uint8_t reg)**
+
 
 ## Future
 
@@ -37,9 +101,11 @@ It has three examples
 - calibrate function in the lib ?  (think not as lib might grow?)
 - calibrate sketch could print code snippet to include...
 
+
 ## documents
 
 - check details - MPU-6000-Register-Map1.pdf
+
 
 ## Operation
 
