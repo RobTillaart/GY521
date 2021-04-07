@@ -107,7 +107,7 @@ int16_t GY521::read()
   _ay *= _raw2g;
   _az *= _raw2g;
 
-  // Error correct raw acceleration (in g) mesurements  // #18 kudos to Merkxic
+  // Error correct raw acceleration (in g) measurements  // #18 kudos to Merkxic
   _ax += axe;
   _ay += aye;
   _az += aze;
