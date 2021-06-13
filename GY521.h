@@ -41,6 +41,7 @@ public:
 #endif
   bool     begin();
   bool     isConnected();
+  void     reset();
 
   bool     wakeup();
   // throttle to force delay between reads.
