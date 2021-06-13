@@ -36,18 +36,6 @@ unittest_teardown()
 {
 }
 
-/*
-unittest(test_new_operator)
-{
-  assertEqualINF(exp(800));
-  assertEqualINF(0.0/0.0);
-  assertEqualINF(42);
-
-  assertEqualNAN(INFINITY - INFINITY);
-  assertEqualNAN(0.0/0.0);
-  assertEqualNAN(42);
-}
-*/
 
 unittest(test_constructor)
 {
@@ -56,14 +44,13 @@ unittest(test_constructor)
   sensor.begin();
   assertEqual(GY521_OK, sensor.getError());
 
-  assertTrue(sensor.isConnected());
+  assertTrue(sensor.isConnected());  // incorrect but OK
 }
 
 
-unittest(test_get_set)
+unittest(test_get_set_throttle)
 {
   GY521 sensor(0x69);
-  fprintf(stderr, "VERSION: %s\n", GY521_LIB_VERSION);
   sensor.begin();
   assertEqual(GY521_OK, sensor.getError());
 
@@ -79,6 +66,14 @@ unittest(test_get_set)
     fprintf(stderr, "%d\t", sensor.getThrottleTime());
     assertEqual(ti, sensor.getThrottleTime());
   }
+}
+
+
+
+unittest(test_get_set_sensitivity)
+{
+  GY521 sensor(0x69);
+  sensor.begin();
 
   fprintf(stderr, "setAccelSensitivity() - fails \n");
   for (int as = 0; as < 4; as++)
@@ -95,7 +90,6 @@ unittest(test_get_set)
     // fprintf(stderr, "%d\n", sensor.getAccelSensitivity());
     assertEqual(255, sensor.getAccelSensitivity());
   }
-
 }
 
 
@@ -113,7 +107,7 @@ unittest(test_constants)
 }
 
 
-unittest(test_start_values)
+unittest(test_initial_values)
 {
   GY521 sensor(0x69);
 
@@ -135,9 +129,8 @@ unittest(test_start_values)
 
   fprintf(stderr, "\nother values()\n");
   assertEqualFloat(0, sensor.getTemperature(), 0.0001);
-  assertEqualFloat(0, sensor.lastTime(), 0.0001);
-  assertEqualFloat(0, sensor.getError(), 0.0001);
-
+  assertEqual(0, sensor.lastTime() );
+  assertEqual(0, sensor.getError() );
 }
 
 
@@ -153,7 +146,6 @@ unittest(test_initial_calibration_errors)
   assertEqualFloat(0, sensor.gye, 0.0001);
   assertEqualFloat(0, sensor.gze, 0.0001);
 }
-
 
 
 unittest_main()
