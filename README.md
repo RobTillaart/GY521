@@ -81,7 +81,6 @@ AD0 connected to VCC => 0x69
 
 #### Set before read
 
-  // as = 0,1,2,3 ==> 2g 4g 8g 16g
 - **bool setAccelSensitivity(uint8_t as)** as = 0, 1, 2, 3 ==> 2g 4g 8g 16g
 - **uint8_t getAccelSensitivity()** returns 0, 1, 2, 3
 - **bool setGyroSensitivity(uint8_t gs)** gs = 0,1,2,3  ==>  250, 500, 1000, 2000 degrees/second
