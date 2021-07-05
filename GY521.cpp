@@ -112,7 +112,8 @@ int16_t GY521::read()
   int8_t n = _wire->requestFrom(_address, (uint8_t)14);
   if (n != 14)
   {
-    return GY521_ERROR_READ;
+    _error = GY521_ERROR_READ;
+    return _error;
   }
   // ACCELEROMETER
   _ax = _WireRead2();  // ACCEL_XOUT_H  ACCEL_XOUT_L
