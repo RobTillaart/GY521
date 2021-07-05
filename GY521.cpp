@@ -1,7 +1,7 @@
 //
 //    FILE: GY521.cpp
 //  AUTHOR: Rob Tillaart
-// VERSION: 0.3.1
+// VERSION: 0.3.2
 // PURPOSE: Arduino library for I2C GY521 accelerometer-gyroscope sensor
 //     URL: https://github.com/RobTillaart/GY521
 //
@@ -11,14 +11,15 @@
 //  0.1.2   2020-08-06  fix setAccelSensitivity + add getters
 //  0.1.3   2020-08-07  fix ESP support + pitch roll yaw demo
 //  0.1.4   2020-09-29  fix #5 missing ;
-//  0.1.5   2020-09-29  fix #6 fix math for Teensy
+//  0.1.5   2020-09-29  fix #6 fix maths for Teensy
 //  0.2.0   2020-11-03  improve error handling
-//  0.2.1   2020-12-24  arduino-ci + unit tests
-//  0.2.2   2021-01-24  add interface part to readme.md 
+//  0.2.1   2020-12-24  Arduino-CI + unit tests
+//  0.2.2   2021-01-24  add interface part to readme.md
 //                      add GY521_registers.h
 //  0.2.3   2021-01-26  align version numbers (oops)
 //  0.3.0   2021-04-07  fix #18 acceleration error correction (kudo's to Merkxic)
 //  0.3.1   2021-06-13  added more unit test + some initialization
+//  0.3.2   2021-07-05  fix #20 support multiWire
 
 
 #include "GY521.h"
@@ -35,9 +36,10 @@
 //
 // PUBLIC
 //
-GY521::GY521(uint8_t address)
+GY521::GY521(uint8_t address, TwoWire *wire)
 {
   _address = address;
+  _wire    = wire;
   reset();
 }
 
@@ -45,7 +47,7 @@ GY521::GY521(uint8_t address)
 #if defined (ESP8266) || defined(ESP32)
 bool GY521::begin(uint8_t sda, uint8_t scl)
 {
-  Wire.begin(sda, scl);
+  _wire->begin(sda, scl);
   return isConnected();
 }
 #endif
@@ -53,15 +55,15 @@ bool GY521::begin(uint8_t sda, uint8_t scl)
 
 bool GY521::begin()
 {
-  Wire.begin();
+  _wire->begin();
   return isConnected();
 }
 
 
 bool GY521::isConnected()
 {
-  Wire.beginTransmission(_address);
-  return (Wire.endTransmission() == 0);
+  _wire->beginTransmission(_address);
+  return (_wire->endTransmission() == 0);
 }
 
 void GY521::reset()
@@ -79,10 +81,10 @@ void GY521::reset()
 
 bool GY521::wakeup()
 {
-  Wire.beginTransmission(_address);
-  Wire.write(GY521_PWR_MGMT_1);
-  Wire.write(GY521_WAKEUP);
-  return (Wire.endTransmission() == 0);
+  _wire->beginTransmission(_address);
+  _wire->write(GY521_PWR_MGMT_1);
+  _wire->write(GY521_WAKEUP);
+  return (_wire->endTransmission() == 0);
 }
 
 
@@ -92,18 +94,26 @@ int16_t GY521::read()
   {
     if ((millis() - _lastTime) < _throttleTime)
     {
+      // not an error.
       return GY521_THROTTLED;
     }
   }
 
   // Connected ?
-  Wire.beginTransmission(_address);
-  Wire.write(GY521_ACCEL_XOUT_H);
-  if (Wire.endTransmission() != 0) return GY521_ERROR_WRITE;
+  _wire->beginTransmission(_address);
+  _wire->write(GY521_ACCEL_XOUT_H);
+  if (_wire->endTransmission() != 0)
+  {
+    _error = GY521_ERROR_WRITE;
+    return _error;
+  }
 
   // Get the data
-  int8_t n = Wire.requestFrom(_address, (uint8_t)14);
-  if (n != 14) return GY521_ERROR_READ;
+  int8_t n = _wire->requestFrom(_address, (uint8_t)14);
+  if (n != 14)
+  {
+    return GY521_ERROR_READ;
+  }
   // ACCELEROMETER
   _ax = _WireRead2();  // ACCEL_XOUT_H  ACCEL_XOUT_L
   _ay = _WireRead2();  // ACCEL_YOUT_H  ACCEL_YOUT_L
@@ -142,19 +152,19 @@ int16_t GY521::read()
   _gx *= _raw2dps;
   _gy *= _raw2dps;
   _gz *= _raw2dps;
-  
+
   // Error correct raw gyro measurements.
   _gx += gxe;
   _gy += gye;
   _gz += gze;
-  
+
   _gax += _gx * duration;
   _gay += _gy * duration;
   _gaz += _gz * duration;
 
-  _yaw = _gaz;
+  _yaw   = _gaz;
   _pitch = 0.96 * _gay + 0.04 * _aay;
-  _roll = 0.96 * _gax + 0.04 * _aax;
+  _roll  = 0.96 * _gax + 0.04 * _aax;
 
   return GY521_OK;
 }
@@ -236,11 +246,11 @@ uint8_t GY521::getGyroSensitivity()
 
 uint8_t GY521::setRegister(uint8_t reg, uint8_t value)
 {
-  Wire.beginTransmission(_address);
-  Wire.write(reg);
-  Wire.write(value);
+  _wire->beginTransmission(_address);
+  _wire->write(reg);
+  _wire->write(value);
   // no need to do anything if not connected.
-  if (Wire.endTransmission() != 0) 
+  if (_wire->endTransmission() != 0)
   {
     _error = GY521_ERROR_WRITE;
     return _error;
@@ -251,20 +261,20 @@ uint8_t GY521::setRegister(uint8_t reg, uint8_t value)
 
 uint8_t GY521::getRegister(uint8_t reg)
 {
-  Wire.beginTransmission(_address);
-  Wire.write(reg);
-  if (Wire.endTransmission() != 0)
+  _wire->beginTransmission(_address);
+  _wire->write(reg);
+  if (_wire->endTransmission() != 0)
   {
     _error = GY521_ERROR_WRITE;
     return _error;
   }
-  uint8_t n = Wire.requestFrom(_address, (uint8_t) 1);
-  if (n != 1) 
+  uint8_t n = _wire->requestFrom(_address, (uint8_t) 1);
+  if (n != 1)
   {
     _error = GY521_ERROR_READ;
     return _error;
   }
-  uint8_t val = Wire.read();
+  uint8_t val = _wire->read();
   return val;
 }
 
@@ -272,10 +282,11 @@ uint8_t GY521::getRegister(uint8_t reg)
 // to read register of 2 bytes.
 int16_t GY521::_WireRead2()
 {
-  int16_t tmp = Wire.read();
+  int16_t tmp = _wire->read();
   tmp <<= 8;
-  tmp |= Wire.read();
+  tmp |= _wire->read();
   return tmp;
 }
+
 
 // -- END OF FILE --
