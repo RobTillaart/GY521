@@ -1,7 +1,7 @@
 //
 //    FILE: GY521.cpp
 //  AUTHOR: Rob Tillaart
-// VERSION: 0.3.2
+// VERSION: 0.3.3
 // PURPOSE: Arduino library for I2C GY521 accelerometer-gyroscope sensor
 //     URL: https://github.com/RobTillaart/GY521
 //
@@ -20,6 +20,7 @@
 //  0.3.0   2021-04-07  fix #18 acceleration error correction (kudo's to Merkxic)
 //  0.3.1   2021-06-13  added more unit test + some initialization
 //  0.3.2   2021-07-05  fix #20 support multiWire
+//  0.3.3   2021-07-05  fix #22 improve maths
 
 
 #include "GY521.h"
@@ -30,6 +31,8 @@
 #define GY521_WAKEUP                 0x00
 
 #define RAD2DEGREES                 (180.0 / PI)
+#define RAW2DPS_FACTOR              (1.0 / 131.0)
+#define RAW2G_FACTOR                (1.0 / 16384.0)
 
 
 /////////////////////////////////////////////////////
@@ -131,6 +134,8 @@ int16_t GY521::read()
   float duration = (now - _lastTime) * 0.001;   // time in seconds.
   _lastTime = now;
 
+  // next lines might be merged per axis.
+
   // Convert raw acceleration to g's
   _ax *= _raw2g;
   _ay *= _raw2g;
@@ -142,9 +147,17 @@ int16_t GY521::read()
   _az += aze;
 
   // prepare for Pitch Roll Yaw
-  _aax = atan(_ay / hypot(_ax, _az)) * RAD2DEGREES;
-  _aay = atan(-1.0 * _ax / hypot(_ay, _az)) * RAD2DEGREES;
-  _aaz = atan(_az / hypot(_ax, _ay)) * RAD2DEGREES;
+  float _ax2 = _ax * _ax;
+  float _ay2 = _ay * _ay;
+  float _az2 = _az * _az;
+
+  _aax = atan(       _ay / sqrt(_ax2 + _az2)) * RAD2DEGREES;
+  _aay = atan(-1.0 * _ax / sqrt(_ay2 + _az2)) * RAD2DEGREES;
+  _aaz = atan(       _az / sqrt(_ax2 + _ay2)) * RAD2DEGREES;
+  // optimize #22
+  // _aax = atan(_ay / hypot(_ax, _az)) * RAD2DEGREES;
+  // _aay = atan(-1.0 * _ax / hypot(_ay, _az)) * RAD2DEGREES;
+  // _aaz = atan(_az / hypot(_ax, _ay)) * RAD2DEGREES;
 
   // Convert to Celsius
   _temperature = _temperature * 0.00294117647 + 36.53;  //  == /340.0  + 36.53;
@@ -190,8 +203,8 @@ bool GY521::setAccelSensitivity(uint8_t as)
       return false;
     }
   }
-  // calculate conversion factor.
-  _raw2g = (1 << _afs) / 16384.0;
+  // calculate conversion factor.  // 4 possible values => lookup table?
+  _raw2g = (1 << _afs) * RAW2G_FACTOR;
   return true;
 }
 
@@ -227,8 +240,8 @@ bool GY521::setGyroSensitivity(uint8_t gs)
       return false;
     }
   }
-  // calculate conversion factor.
-  _raw2dps = (1 << _gfs) / 131.0;
+  // calculate conversion factor..  // 4 possible values => lookup table?
+  _raw2dps = (1 << _gfs) * RAW2DPS_FACTOR;
   return true;
 }
 
