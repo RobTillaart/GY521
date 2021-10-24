@@ -5,10 +5,10 @@
 // PURPOSE: read the calibration values / errors for a flat sensor.
 //    DATE: 2020-07-14
 
-
+//#define SWIRE
 #include "GY521.h"
 
-GY521 sensor(0x69);
+GY521 sensor(0x68);
 
 uint32_t counter = 0;
 
@@ -22,7 +22,12 @@ void setup()
   Serial.begin(115200);
   Serial.println(__FILE__);
 
+#ifdef SWIRE
+  sensor.begin(A3,A4);
+#else
   Wire.begin();
+#endif
+
   delay(100);
   if (sensor.wakeup() == false)
   {

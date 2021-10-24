@@ -24,7 +24,6 @@
 //  0.3.4   2021-07-12  fix #24 improve precision
 //  0.3.5   2021-10-20  update build-CI, badges + #28 add wakeup to begin().
 
-
 #include "GY521.h"
 
 // keep register names in sync with BIG MPU6050 lib
@@ -41,18 +40,25 @@
 //
 // PUBLIC
 //
+#ifdef SWIRE
+GY521::GY521(uint8_t address){  _address = address;  reset(); }
+#else
 GY521::GY521(uint8_t address, TwoWire *wire)
 {
   _address = address;
   _wire    = wire;
   reset();
 }
+#endif
 
-
-#if defined (ESP8266) || defined(ESP32)
+#if defined (ESP8266) || defined(ESP32) || defined(SWIRE)
 bool GY521::begin(uint8_t sda, uint8_t scl)
 {
+#ifdef SWIRE
+SWire.begin(sda, scl);
+#else
   _wire->begin(sda, scl);
+#endif
   if (isConnected())
   {
     return wakeup();
@@ -61,7 +67,7 @@ bool GY521::begin(uint8_t sda, uint8_t scl)
 }
 #endif
 
-
+#ifndef SWIRE
 bool GY521::begin()
 {
   _wire->begin();
@@ -71,12 +77,17 @@ bool GY521::begin()
   }
   return false;
 }
-
+#endif
 
 bool GY521::isConnected()
 {
+#ifdef SWIRE
+  SWire.beginTransmission(_address);
+  return (SWire.endTransmission() == 0);
+#else
   _wire->beginTransmission(_address);
   return (_wire->endTransmission() == 0);
+#endif
 }
 
 void GY521::reset()
@@ -94,15 +105,31 @@ void GY521::reset()
 
 bool GY521::wakeup()
 {
+#ifdef SWIRE
+  SWire.beginTransmission(_address);
+  SWire.write(GY521_PWR_MGMT_1);
+  SWire.write(GY521_WAKEUP);
+  return (SWire.endTransmission() == 0);
+#else
   _wire->beginTransmission(_address);
   _wire->write(GY521_PWR_MGMT_1);
   _wire->write(GY521_WAKEUP);
   return (_wire->endTransmission() == 0);
+#endif
 }
 
 
 int16_t GY521::read()
 {
+#ifdef SWIRE
+  if (_throttle)
+  {
+    if ((millis() - _lastTime) < _throttleTime)
+    {
+      return GY521_THROTTLED;
+    }
+  }
+#else
   uint32_t now = millis();
   if (_throttle)
   {
@@ -113,18 +140,29 @@ int16_t GY521::read()
     }
   }
   _lastTime = now;
+#endif
 
   // Connected ?
+#ifdef SWIRE
+  SWire.beginTransmission(_address);
+  SWire.write(GY521_ACCEL_XOUT_H);
+  if (SWire.endTransmission() != 0)
+#else
   _wire->beginTransmission(_address);
   _wire->write(GY521_ACCEL_XOUT_H);
   if (_wire->endTransmission() != 0)
+#endif
   {
     _error = GY521_ERROR_WRITE;
     return _error;
   }
 
   // Get the data
+#ifdef SWIRE
+  int8_t n = SWire.requestFrom(_address, (uint8_t)14);
+#else
   int8_t n = _wire->requestFrom(_address, (uint8_t)14);
+#endif
   if (n != 14)
   {
     _error = GY521_ERROR_READ;
@@ -142,9 +180,15 @@ int16_t GY521::read()
   _gz = _WireRead2();  // GYRO_ZOUT_H   GYRO_ZOUT_L
 
   // duration interval
+#ifdef SWIRE
+  uint32_t now = millis();
+  float duration = (now - _lastTime) * 1e-6;   // time in seconds.
+  _lastTime = now;
+#else
   now = micros();
   float duration = (now - _lastMicros) * 1e-6;  // duration in seconds.
   _lastMicros = now;
+#endif
 
 
   // next lines might be merged per axis.
@@ -273,11 +317,18 @@ uint8_t GY521::getGyroSensitivity()
 
 uint8_t GY521::setRegister(uint8_t reg, uint8_t value)
 {
+#ifdef SWIRE
+  SWire.beginTransmission(_address);
+  SWire.write(reg);
+  SWire.write(value);
+  if (SWire.endTransmission() != 0)
+#else
   _wire->beginTransmission(_address);
   _wire->write(reg);
   _wire->write(value);
   // no need to do anything if not connected.
   if (_wire->endTransmission() != 0)
+#endif
   {
     _error = GY521_ERROR_WRITE;
     return _error;
@@ -288,6 +339,15 @@ uint8_t GY521::setRegister(uint8_t reg, uint8_t value)
 
 uint8_t GY521::getRegister(uint8_t reg)
 {
+#ifdef SWIRE
+  SWire.beginTransmission(_address);
+  SWire.write(reg);
+  if (SWire.endTransmission() != 0)  {    _error = GY521_ERROR_WRITE;    return _error;  }
+  uint8_t n = SWire.requestFrom(_address, (uint8_t) 1);
+  if (n != 1)  {    _error = GY521_ERROR_READ;    return _error;  }
+  uint8_t val = SWire.read();
+  return val;
+#else
   _wire->beginTransmission(_address);
   _wire->write(reg);
   if (_wire->endTransmission() != 0)
@@ -303,15 +363,22 @@ uint8_t GY521::getRegister(uint8_t reg)
   }
   uint8_t val = _wire->read();
   return val;
+#endif
 }
 
 
 // to read register of 2 bytes.
 int16_t GY521::_WireRead2()
 {
+#ifdef SWIRE
+  int16_t tmp = SWire.read();
+  tmp <<= 8;
+  tmp |= SWire.read();
+#else
   int16_t tmp = _wire->read();
   tmp <<= 8;
   tmp |= _wire->read();
+#endif
   return tmp;
 }
 

@@ -12,8 +12,15 @@
 
 
 #include "Arduino.h"
-#include "Wire.h"
 
+
+
+//#define SWIRE //use version 1.0.0 if readings are 0's
+#ifdef SWIRE
+	#include "SWire.h"
+#else
+	#include "Wire.h"
+#endif
 
 #define GY521_LIB_VERSION           (F("0.3.5"))
 
@@ -34,13 +41,20 @@
 class GY521
 {
 public:
+#ifdef SWIRE
+  GY521(uint8_t address = 0x69); // 0x68 or 0x69
+#else
   GY521(uint8_t address = 0x69, TwoWire *wire = &Wire); // 0x68 or 0x69
+#endif
 
-
-#if defined (ESP8266) || defined(ESP32)
+#if defined (ESP8266) || defined(ESP32) || defined(SWIRE)
   bool     begin(uint8_t sda, uint8_t scl);
 #endif
+
+#ifndef SWIRE
   bool     begin();
+#endif
+
   bool     isConnected();
   void     reset();
 
@@ -123,7 +137,9 @@ private:
   // to read register of 2 bytes.
   int16_t  _WireRead2();
 
+#ifndef SWIRE
   TwoWire*  _wire;
+#endif
 };
 
 

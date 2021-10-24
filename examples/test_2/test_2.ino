@@ -5,10 +5,10 @@
 // PURPOSE: test set/get
 //    DATE: 2020-08-06
 
-
+//#define SWIRE
 #include "GY521.h"
 
-GY521 sensor(0x69);
+GY521 sensor(0x68);
 
 
 void setup()
@@ -16,7 +16,11 @@ void setup()
   Serial.begin(115200);
   Serial.println(__FILE__);
 
+#ifdef SWIRE
+  sensor.begin(A3,A4);
+#else
   Wire.begin();
+#endif
 
   delay(100);
   if (sensor.wakeup() == false)
