@@ -22,7 +22,7 @@
 //  0.3.2   2021-07-05  fix #20 support multiWire
 //  0.3.3   2021-07-05  fix #22 improve maths
 //  0.3.4   2021-07-12  fix #24 improve precision
-//  0.3.5   2021-10-20  update build-CI, badges + #28 add wakeup to begin().
+//  0.3.5   2021-10-20  update build-CI, badges + #28 add wakeup to begin(). SWIRE support
 
 #include "GY521.h"
 
