@@ -237,11 +237,6 @@ int16_t GY521::readAccel()
   _ay = _WireRead2();  // ACCEL_YOUT_H  ACCEL_YOUT_L
   _az = _WireRead2();  // ACCEL_ZOUT_H  ACCEL_ZOUT_L
 
-  // duration interval
-  now = micros();
-  float duration = (now - _lastMicros) * 1e-6;  // duration in seconds.
-  _lastMicros = now;
-
   // next lines might be merged per axis.
 
   // Convert raw acceleration to g's
