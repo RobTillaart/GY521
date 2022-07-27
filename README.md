@@ -92,13 +92,15 @@ AD0 connected to VCC => 0x69
 
 #### Actual read
 
-- **int16_t read()** returns status, GY521_OK on success.
+- **int16_t read()** returns status = GY521_OK on success.
 - **int16_t readAccel()** read accelerometer only to speed up interaction. This call does update the throttle timer.
+returns status = GY521_OK on success.
 - **int16_t readGyro()** read gyroscope only to speed up interaction. This call does update the throttle timer.
-returns status, GY521_OK on success.
+returns status = GY521_OK on success.
 Note: for pitch roll yaw you need to call **read()**.
 - **int16_t readTemperature()** read temperature only, does **not** update the throttle timer.
-- **uint32_t lastTime()** last time sensor is actually read. In milliseconds. Is not updated by readTemperature().
+returns status = GY521_OK on success.
+- **uint32_t lastTime()** last time sensor is actually read. In milliseconds. Not updated by readTemperature().
 
 
 #### Call after read
