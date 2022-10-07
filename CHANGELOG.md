@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [0.3.8] - 2022-10-07
 
 - added CHANGELOG.md
-- fix #16 - limit values of pitch() roll() yaw() to 0..360 range.
+- fix #36 - limit values of pitch() roll() yaw() to 0..360 range.
 - rename three constants, move to .h.
   - add constants check to unit test.
   - updated keywords
