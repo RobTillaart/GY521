@@ -10,11 +10,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - fix #42 roll + pitch "jumps" after full rotation.
 - fixed normalization code.
 - made normalization conditional
-  = add **void setNormalize(bool normalize = true)**
-  = add **bool getNormalize()**
+  - add **void setNormalize(bool normalize = true)**
+  - add **bool getNormalize()**
 - update readme.md
 - minor edits
 
+----
 
 ## [0.3.9] - 2023-01-27
 - update GitHub actions
