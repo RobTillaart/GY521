@@ -4,6 +4,7 @@
 // PURPOSE: minimal demo to test working of the sensor.
 //     URL: https://github.com/RobTillaart/GY521
 
+
 #include "GY521.h"
 
 GY521 sensor(0x69);
@@ -47,13 +48,13 @@ void setup()
 void loop()
 {
   sensor.read();
-  int ax = sensor.getAccelX();
-  int ay = sensor.getAccelY();
-  int az = sensor.getAccelZ();
-  int gx = sensor.getGyroX();
-  int gy = sensor.getGyroY();
-  int gz = sensor.getGyroZ();
-  int t = sensor.getTemperature();
+  float ax = sensor.getAccelX();
+  float ay = sensor.getAccelY();
+  float az = sensor.getAccelZ();
+  float gx = sensor.getGyroX();
+  float gy = sensor.getGyroY();
+  float gz = sensor.getGyroZ();
+  float t = sensor.getTemperature();
 
   if (counter % 10 == 0)
   {
@@ -63,19 +64,19 @@ void loop()
 
   Serial.print(counter);
   Serial.print('\t');
-  Serial.print(ax);
+  Serial.print(ax, 3);
   Serial.print('\t');
-  Serial.print(ay);
+  Serial.print(ay, 3);
   Serial.print('\t');
-  Serial.print(az);
+  Serial.print(az, 3);
   Serial.print('\t');
-  Serial.print(gx);
+  Serial.print(gx, 3);
   Serial.print('\t');
-  Serial.print(gy);
+  Serial.print(gy, 3);
   Serial.print('\t');
-  Serial.print(gz);
+  Serial.print(gz, 3);
   Serial.print('\t');
-  Serial.print(t);
+  Serial.print(t, 3);
   Serial.println();
 
   counter++;

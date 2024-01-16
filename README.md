@@ -112,7 +112,8 @@ Note call **Wire.begin()** before **begin()**.
 
 #### Actual read
 
-- **int16_t read()** returns status = GY521_OK on success.
+- **int16_t read()** reads all core measurements.
+returns status = GY521_OK on success.
 - **int16_t readAccel()** read accelerometer only to speed up interaction. This call does update the throttle timer.
 returns status = GY521_OK on success.
 - **int16_t readGyro()** read gyroscope only to speed up interaction. This call does update the throttle timer.
@@ -132,7 +133,8 @@ In version 0.4.0 the normalization of pitch, roll and yaw is fixed and made cond
 
 #### Calls after read
 
-Note that multiple calls will return the same value. One must explicitly call **read()** to get new values. 
+Note that multiple calls will return the same value. 
+One must explicitly call **read()** to get new values. 
 
 - **float getAccelX()** idem.
 - **float getAccelY()** idem.
@@ -162,7 +164,42 @@ Read the register PDF for the specific value and meaning of registers.
 
 ## documents
 
-- check details - MPU-6000-Register-Map1.pdf
+- check details registers - MPU-6000-Register-Map1.pdf
+
+
+#### Error codes
+
+|  Error code                 |  value  |  notes  |
+|:----------------------------|:-------:|:-------:|
+|  GY521_OK                   |    0    |  not an error
+|  GY521_THROTTLED            |    1    |  not an error
+|  GY521_ERROR_READ           |   -1    |
+|  GY521_ERROR_WRITE          |   -2    |
+|  GY521_ERROR_NOT_CONNECTED  |   -3    |
+
+
+#### Sensitivity Acceleration
+
+unit g = gravity == 9.81 m/s^2
+
+| Acceleration  |  value  |  notes  |
+|:--------------|:-------:|:-------:|
+|      2 g      |    0    |  default
+|      4 g      |    1    |
+|      8 g      |    2    |
+|     16 g      |    3    |
+
+
+#### Sensitivity Gyroscope
+
+unit dps = degrees per second.
+
+|  Gyroscope    |  value  |  notes  |
+|:--------------|:-------:|:-------:|
+|   250 dps     |    0    |  default
+|   500 dps     |    1    |
+|  1000 dps     |    2    |
+|  2000 dps     |    3    |
 
 
 ## Operation
@@ -175,19 +212,20 @@ See examples, use with care
 #### Must
 
 - improve documentation
-  - add tables where appropriate
-  - sensitivity, error codes etc
 - test test and test ...(ESP too)
 
 #### Should
 
-- add performance sketch
 
 #### Could
 
 - calibrate sketch could print code snippet to include...
 - add examples
 - improve unit tests?
+- reorder code in read(), would that save some micros.?
+  - first all ax, then ay etc
+  - footprint / performance gain?
+
 
 #### Wont
 
@@ -196,6 +234,9 @@ See examples, use with care
   - other ideas affect accuracy, so unless new ideas arise.
 - calibrate function in the lib
   - not as lib will grow too large.
+- defaults value for functions?
+  - user must set function parameters explicit
+
 
 ## Support
 
