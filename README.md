@@ -225,6 +225,8 @@ See examples, use with care
 - reorder code in read(), would that save some micros.?
   - first all ax, then ay etc
   - footprint / performance gain?
+- make enum for sensitivity Accel?
+- make enum for sensitivity Gyro?
 
 
 #### Wont
