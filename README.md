@@ -16,12 +16,13 @@ Arduino library for I2C GY521 accelerometer-gyroscope sensor a.k.a. MCU-6050.
 
 ## Description
 
-Experimental library for GY521 a.k.a. MCU-6050.
+**Experimental** library for GY521 a.k.a. MCU-6050.
 
 Library is work in progress, in fact it is extracted and extended from an old project.
 It needs to be tested a lot more.
 
 See changelog.md for latest updates.
+
 
 #### 0.5.0 Breaking change
 
@@ -37,10 +38,22 @@ before calling **begin()**.
 - **GY521_angle** read angleX, angleY, angleZ.
 - **GY521_performance** measure performance.
 - **GY521_pitch_roll_yaw** to get pitch roll yaw.
-- **GY521_readCalibration_1** read calibration values / errors for a flat sensor.
+- **GY521_raw_cooked** make a table of raw measurements and derived data 
+for analysis e.g. in a spreadsheet.
+- **GY521_readCalibration_1** read calibration values / errors for a "flat" sensor.
 - **GY521_readCalibration_2** generate calibration code snippet.
 - **GY521_test_1** test working of the sensor.
-- **GY521_test_2** test set/get functions.
+- **GY521_test_2** test set/get functions (sort of unit test).
+- **GY521_two_sensors** demo for two sensors.
+
+
+#### Related
+
+- https://invensense.tdk.com/wp-content/uploads/2015/02/MPU-6000-Datasheet1.pdf
+- https://cdn.sparkfun.com/datasheets/Sensors/Accelerometers/RM-MPU-6000A.pdf  register map.
+- https://github.com/RobTillaart/Angle
+- https://github.com/RobTillaart/AngleConverter
+
 
 
 ## Breakout board
@@ -67,6 +80,11 @@ AD0 connected to VCC => 0x69
 
 ## Calibration (short version for now)
 
+Since version 0.5.2 the library has a build in **void calibrate(times)** function which
+can be called instead of manual copying.
+This function overwrites the values of axe aye aze gxe gye gze.
+**calibrate()** must be called after **setAccelSensitivity(as)** and **setGyroSensitivity(gs)**.
+
 1. load and run calibration example  
    it shows a header containing 6 numbers and 10 lines of 8 numbers
 1. wait until the middle 6 of the longer lines stabilize (should all be 0)
@@ -88,6 +106,15 @@ Note call **Wire.begin()** before **begin()**.
 - **bool isConnected()** returns true if device can be found on I2C bus.
 - **void reset()** set all internal values to 0 and throttle time to 10 ms.
 - **bool wakeUp()** idem.
+
+
+### Calibrate
+
+- **void calibrate(uint16_t times)** This function overwrites the values of axe aye aze gxe gye gze.
+To get quality error numbers, the GY521 sensor should not move during calibration.
+The parameter times determines the number of measurements made.
+Typical values are 100 or more.  
+Please note this is a time consuming function.
 
 
 ### Throttle
@@ -146,6 +173,12 @@ One must explicitly call **read()** to get new values.
 - **float getGyroX()** idem.
 - **float getGyroY()** idem.
 - **float getGyroZ()** idem.
+
+
+#### Experimental Pitch Roll and Yaw
+
+Pitch Roll and Yaw is work in progress and should not be used for projects yet.
+
 - **float getPitch()** idem. May return any number.
 If **setNormalize(true)** return value will be 0-359.999
 - **float getRoll()** idem. May return any number.
@@ -162,7 +195,7 @@ Read the register PDF for the specific value and meaning of registers.
 - **uint8_t getRegister(uint8_t reg)**
 
 
-## documents
+## Documents
 
 - check details registers - MPU-6000-Register-Map1.pdf
 
@@ -204,22 +237,27 @@ unit dps = degrees per second.
 
 ## Operation
 
-See examples, use with care 
+See examples, use with care.
 
 
 ## Future
 
 #### Must
 
+- time
 - improve documentation
+- investigate Pitch Roll and Yaw math in detail.
+  - investigate math needed.
+  - implementation.
+  - when?
 - test test and test ...(ESP too)
 
 #### Should
 
+- test **calibrate()** function for different sensitivities.
 
 #### Could
 
-- calibrate sketch could print code snippet to include...
 - add examples
 - improve unit tests?
 - reorder code in read(), would that save some micros.?
@@ -227,7 +265,6 @@ See examples, use with care
   - footprint / performance gain?
 - make enum for sensitivity Accel?
 - make enum for sensitivity Gyro?
-
 
 #### Wont
 

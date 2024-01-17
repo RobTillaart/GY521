@@ -43,8 +43,8 @@ void setup()
   sensor.gye = 0;
   sensor.gze = 0;
 
-  Serial.println("\n\tACCELEROMETER\t\tGYROSCOPE\t\tTEMP\tPRY\t\t\tANGLE");
-  Serial.println("\tax\tay\taz\tgx\tgy\tgz\tT\tPITCH\tROLL\tYAW\tX\tY\tZ");
+  Serial.println("\n\tACCELEROMETER\t\tGYROSCOPE\t\tTEMP\tANGLES\t\t\tPRY");
+  Serial.println("\tax\tay\taz\tgx\tgy\tgz\tT\tX\tY\tZ\tPITCH\tROLL\tYAW");
 }
 
 
@@ -83,17 +83,17 @@ void loop()
   Serial.print('\t');
   Serial.print(t, 3);
   Serial.print('\t');
-  Serial.print(pitch, 3);
-  Serial.print('\t');
-  Serial.print(roll, 3);
-  Serial.print('\t');
-  Serial.print(yaw, 3);
-  Serial.print('\t');
   Serial.print(x, 1);
   Serial.print('\t');
   Serial.print(y, 1);
   Serial.print('\t');
   Serial.print(z, 1);
+  Serial.print('\t');
+  Serial.print(pitch, 3);
+  Serial.print('\t');
+  Serial.print(roll, 3);
+  Serial.print('\t');
+  Serial.print(yaw, 3);
   Serial.println();
 
   counter++;

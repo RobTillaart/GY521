@@ -44,6 +44,10 @@ public:
   bool     isConnected();
   void     reset();
 
+  //  EXPERIMENTAL
+  //  calibrate needs to be called to compensate for errors.
+  //  must be called after setAccelSensitivity(as); and setGyroSensitivity(gs);
+  void     calibrate(uint16_t times);
 
   bool     wakeup();
   //  throttle to force delay between reads.
@@ -90,6 +94,9 @@ public:
   float    getGyroX()    { return _gx; };
   float    getGyroY()    { return _gy; };
   float    getGyroZ()    { return _gz; };
+
+  //  EXPERIMENTAL
+  //  pitch, roll and yaw is work in progress.
   float    getPitch()    { return _pitch; };
   float    getRoll()     { return _roll; };
   float    getYaw()      { return _yaw; };
