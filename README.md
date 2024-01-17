@@ -36,6 +36,7 @@ before calling **begin()**.
 #### Examples
 
 - **GY521_angle** read angleX, angleY, angleZ.
+- **GY521_performance_calibrate.ino** determine calibration performance.
 - **GY521_performance** measure performance.
 - **GY521_pitch_roll_yaw** to get pitch roll yaw.
 - **GY521_raw_cooked** make a table of raw measurements and derived data 
@@ -81,9 +82,14 @@ AD0 connected to VCC => 0x69
 ## Calibration (short version for now)
 
 Since version 0.5.2 the library has a build in **void calibrate(times)** function which
-can be called instead of manual copying.
+can be called instead of manual calibration.
 This function overwrites the values of axe aye aze gxe gye gze.
 **calibrate()** must be called after **setAccelSensitivity(as)** and **setGyroSensitivity(gs)**.
+
+Note the **calibrate()** function takes time, depending on the number of times.
+
+
+#### Manual calibration
 
 1. load and run calibration example  
    it shows a header containing 6 numbers and 10 lines of 8 numbers
@@ -111,10 +117,13 @@ Note call **Wire.begin()** before **begin()**.
 ### Calibrate
 
 - **void calibrate(uint16_t times)** This function overwrites the values of axe aye aze gxe gye gze.
-To get quality error numbers, the GY521 sensor should not move during calibration.
+To get "quality error" offsets, the GY521 sensor should not move during the calibration.
 The parameter times determines the number of measurements made.
-Typical values are 100 or more.  
+Typical values are 100 or more.
 Please note this is a time consuming function.
+
+Ideal the function **calibrate()** should continue until it is stable (how to define) for n reads.
+Drawback is that this would make the duration unpredictable. 
 
 
 ### Throttle
