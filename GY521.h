@@ -2,7 +2,7 @@
 //
 //    FILE: GY521.h
 //  AUTHOR: Rob Tillaart
-// VERSION: 0.5.2
+// VERSION: 0.5.3
 // PURPOSE: Arduino library for I2C GY521 accelerometer-gyroscope sensor
 //     URL: https://github.com/RobTillaart/GY521
 
@@ -11,7 +11,9 @@
 #include "Wire.h"
 
 
-#define GY521_LIB_VERSION           (F("0.5.2"))
+#define GY521_LIB_VERSION           (F("0.5.3"))
+
+const float GRAVITY = 9.80655;
 
 
 //  THROTTLE TIMING
@@ -42,6 +44,7 @@ public:
 
   bool     begin();
   bool     isConnected();
+  uint8_t  getAddress();
   void     reset();
 
   //  EXPERIMENTAL
@@ -105,6 +108,10 @@ public:
   //  last time sensor is actually read.
   uint32_t lastTime()    { return _lastTime; };
 
+  //  CONFIGURATION
+  //  Digital Low Pass Filter - datasheet P13-reg26
+  bool     setDLPFMode(uint8_t mode);  //  returns false if mode > 6
+  uint8_t  getDLPFMode();
 
   //  generic worker to get access to all functionality
   uint8_t  setRegister(uint8_t reg, uint8_t value);
