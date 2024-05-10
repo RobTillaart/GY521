@@ -488,12 +488,13 @@ bool GY521::setDLPFMode(uint8_t mode)
 {
   if (mode > 6)
   {
+    _error = GY521_ERROR_PARAMETER;
     return false;
   }
-  uint8_t val = getRegister(GY521_CONFIG);
-  val &= 0xF8;
-  val |= mode;
-  return true;
+  uint8_t value = getRegister(GY521_CONFIG);
+  value &= 0xF8;
+  value |= mode;
+  return (setRegister(GY521_CONFIG, value) == GY521_OK);
 }
 
 

@@ -28,6 +28,7 @@ const float GRAVITY = 9.80655;
 #define GY521_ERROR_READ            -1
 #define GY521_ERROR_WRITE           -2
 #define GY521_ERROR_NOT_CONNECTED   -3
+#define GY521_ERROR_PARAMETER       -4
 
 
 //  CONVERSION CONSTANTS
