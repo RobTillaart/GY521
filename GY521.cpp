@@ -78,16 +78,18 @@ void GY521::calibrate(uint16_t times)
   bool oldThrottle = _throttle;
   _throttle = false;
 
-  //  set errors to zero, to get raw reads
+  //  set all errors to zero, to get the raw reads.
   axe = aye = aze = 0;
   gxe = gye = gze = 0;
 
-  //  use local error sums, to calculate the average error
+  //  use local error sums, to calculate the average error.
   float _axe = 0, _aye = 0, _aze = 0;
   float _gxe = 0, _gye = 0, _gze = 0;
 
   //  adjust times if zero.
   if (times == 0) times = 1;
+
+  //  summarize (6x) the measurements.
   for (uint16_t i = 0; i < times; i++)
   {
     read();
@@ -108,7 +110,7 @@ void GY521::calibrate(uint16_t times)
   gye = _gye * factor;
   gze = _gze * factor;
 
-  //  restore throttle state
+  //  restore throttle state.
   _throttle = oldThrottle;
 }
 
