@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
 ## [0.6.0] - 2024-06-22
-- fix #12, calibrate() function, Kudos to jens-kuerten and MArimont3
+- fix #54, calibrate() function, Kudos to jens-kuerten and MArimont3
 - minor edits
 
 ----
