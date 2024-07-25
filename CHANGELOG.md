@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
+## [0.6.1] - 2024-07-25
+- explicit initialization of gax, gay and gaz
+
+
 ## [0.6.0] - 2024-06-22
 - fix #54, calibrate() function, Kudos to jens-kuerten and MArimont3
 - minor edits
