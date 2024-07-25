@@ -151,6 +151,7 @@ private:
 
   bool     _normalize = true;       //  default true.
 
+  int16_t  _readRaw();
   //  to read register of 2 bytes.
   int16_t  _WireRead2();
 

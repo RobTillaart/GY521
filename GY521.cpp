@@ -88,7 +88,7 @@ void GY521::calibrate(uint16_t times)
   //  summarize (6x) the measurements.
   for (uint16_t i = 0; i < times; i++)
   {
-    read();
+    _readRaw();
     _axe -= getAccelX();
     _aye -= getAccelY();
     _aze -= getAccelZ();
@@ -133,32 +133,11 @@ int16_t GY521::read()
   }
   _lastTime = now;
 
-  //  Connected ?
-  _wire->beginTransmission(_address);
-  _wire->write(GY521_ACCEL_XOUT_H);
-  if (_wire->endTransmission() != 0)
+  int16_t rv = _readRaw();
+  if (rv  != GY521_OK)
   {
-    _error = GY521_ERROR_WRITE;
-    return _error;
+    return rv;
   }
-
-  //  Get the data
-  int8_t n = _wire->requestFrom(_address, (uint8_t)14);
-  if (n != 14)
-  {
-    _error = GY521_ERROR_READ;
-    return _error;
-  }
-  //  ACCELEROMETER
-  _ax = _WireRead2();           //  ACCEL_XOUT_H  ACCEL_XOUT_L
-  _ay = _WireRead2();           //  ACCEL_YOUT_H  ACCEL_YOUT_L
-  _az = _WireRead2();           //  ACCEL_ZOUT_H  ACCEL_ZOUT_L
-  //  TEMPERATURE
-  _temperature = _WireRead2();  //  TEMP_OUT_H    TEMP_OUT_L
-  //  GYROSCOPE
-  _gx = _WireRead2();           //  GYRO_XOUT_H   GYRO_XOUT_L
-  _gy = _WireRead2();           //  GYRO_YOUT_H   GYRO_YOUT_L
-  _gz = _WireRead2();           //  GYRO_ZOUT_H   GYRO_ZOUT_L
 
   //  duration interval
   now = micros();
@@ -542,6 +521,43 @@ uint8_t GY521::getRegister(uint8_t reg)
   }
   uint8_t val = _wire->read();
   return val;
+}
+
+
+///////////////////////////////////////////////////////////////////
+//
+//  PRIVATE
+//
+int16_t GY521::_readRaw()
+{
+  //  Connected ?
+  _wire->beginTransmission(_address);
+  _wire->write(GY521_ACCEL_XOUT_H);
+  if (_wire->endTransmission() != 0)
+  {
+    _error = GY521_ERROR_WRITE;
+    return _error;
+  }
+
+  //  Get the data
+  int8_t n = _wire->requestFrom(_address, (uint8_t)14);
+  if (n != 14)
+  {
+    _error = GY521_ERROR_READ;
+    return _error;
+  }
+  //  ACCELEROMETER
+  _ax = _WireRead2();           //  ACCEL_XOUT_H  ACCEL_XOUT_L
+  _ay = _WireRead2();           //  ACCEL_YOUT_H  ACCEL_YOUT_L
+  _az = _WireRead2();           //  ACCEL_ZOUT_H  ACCEL_ZOUT_L
+  //  TEMPERATURE
+  _temperature = _WireRead2();  //  TEMP_OUT_H    TEMP_OUT_L
+  //  GYROSCOPE
+  _gx = _WireRead2();           //  GYRO_XOUT_H   GYRO_XOUT_L
+  _gy = _WireRead2();           //  GYRO_YOUT_H   GYRO_YOUT_L
+  _gz = _WireRead2();           //  GYRO_ZOUT_H   GYRO_ZOUT_L
+
+  return GY521_OK;
 }
 
 
