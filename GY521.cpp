@@ -97,11 +97,14 @@ void GY521::calibrate(uint16_t times)
     _gze -= getGyroZ();
   }
 
-  //  adjust calibration errors so read() should get all zero's on average.
-  float factor = 1.0 / times;
+  //  scale accelerometer calibration errors so read() should get all zero's on average.
+  float factor = _raw2g / times;
   axe = _axe * factor;
   aye = _aye * factor;
   aze = _aze * factor;
+
+  //  scale gyro calibration errors so read() should get all zero's on average.
+  factor = _raw2dps / times;
   gxe = _gxe * factor;
   gye = _gye * factor;
   gze = _gze * factor;
