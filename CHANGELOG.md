@@ -7,9 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
 ## [0.6.1] - 2024-07-25
-- redo of **calibrate()** function by Maik Menz.
+- redo of **calibrate()** function, Kudos to Maik Menz.
 - improve initialization of gax, gay and gaz
 - add **readRaw()** to improve calibrate()
+- update readme.md 
 
 
 ## [0.6.0] - 2024-06-22
