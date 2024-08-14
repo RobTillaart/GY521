@@ -26,6 +26,10 @@ GY521::GY521(uint8_t address, TwoWire *wire)
   _address = address;
   _wire    = wire;
 
+  //  initialize errors
+  //  don't do it in reset, as users might want to keep them
+  axe = aye = aze = 0;
+
   reset();
 }
 
@@ -68,12 +72,8 @@ void GY521::reset()
 }
 
 
-void GY521::calibrate(uint16_t times)
+void GY521::calibrate(uint16_t times, float angleX, float angleY, bool inverted)
 {
-  //  disable throttling / caching of read values.
-  bool oldThrottle = _throttle;
-  _throttle = false;
-
   //  set all errors to zero, to get the raw reads.
   axe = aye = aze = 0;
   gxe = gye = gze = 0;
@@ -97,20 +97,27 @@ void GY521::calibrate(uint16_t times)
     _gze -= getGyroZ();
   }
 
-  //  scale accelerometer calibration errors so read() should get all zero's on average.
-  float factor = _raw2g / times;
-  axe = _axe * factor;
-  aye = _aye * factor;
-  aze = _aze * factor;
-
   //  scale gyro calibration errors so read() should get all zero's on average.
-  factor = _raw2dps / times;
+  float factor = _raw2dps / times;
   gxe = _gxe * factor;
   gye = _gye * factor;
   gze = _gze * factor;
 
-  //  restore throttle state.
-  _throttle = oldThrottle;
+  //  scale accelerometer calibration errors so read() should get all zero's on average.
+  factor = _raw2g / times;
+  axe = _axe * factor;
+  aye = _aye * factor;
+  aze = _aze * factor;
+
+  //  remove expected gravity from error
+  angleX *= GY521_DEGREES2RAD;
+  angleY *= GY521_DEGREES2RAD;
+  float _gravx = -sin(angleY) * cos(angleX);
+  float _gravy = sin(angleX);
+  float _gravz = cos(angleY) * cos(angleX);
+  axe -= _gravx;
+  aye -= _gravy;
+  aze += inverted ? -_gravz : _gravz;
 }
 
 

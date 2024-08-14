@@ -33,6 +33,7 @@ const float GRAVITY = 9.80655;
 
 //  CONVERSION CONSTANTS
 #define GY521_RAD2DEGREES          (180.0 / PI)
+#define GY521_DEGREES2RAD          (PI / 180.0)
 #define GY521_RAW2DPS              (1.0 / 131.0)
 #define GY521_RAW2G                (1.0 / 16384.0)
 
@@ -51,7 +52,7 @@ public:
   //  EXPERIMENTAL
   //  calibrate needs to be called to compensate for errors.
   //  must be called after setAccelSensitivity(as); and setGyroSensitivity(gs);
-  void     calibrate(uint16_t times);
+  void     calibrate(uint16_t times, float angleX = 0, float angleY = 0, bool inverted = false);
 
   bool     wakeup();
   //  throttle to force delay between reads.
