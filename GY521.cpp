@@ -72,8 +72,12 @@ void GY521::reset()
 }
 
 
-void GY521::calibrate(uint16_t times, float angleX, float angleY, bool inverted)
+bool GY521::calibrate(uint16_t times, float angleX, float angleY, bool inverted)
 {
+  //  disable throttling / caching of read values.
+  bool oldThrottle = _throttle;
+  _throttle = false;
+
   //  set all errors to zero, to get the raw reads.
   axe = aye = aze = 0;
   gxe = gye = gze = 0;
@@ -85,26 +89,32 @@ void GY521::calibrate(uint16_t times, float angleX, float angleY, bool inverted)
   //  adjust times if zero.
   if (times == 0) times = 1;
 
-  //  summarize (6x) the measurements.
+  //  sum (6x) the measurements.
+  uint16_t samples = 0;
   for (uint16_t i = 0; i < times; i++)
   {
-    _readRaw();
-    _axe -= getAccelX();
-    _aye -= getAccelY();
-    _aze -= getAccelZ();
-    _gxe -= getGyroX();
-    _gye -= getGyroY();
-    _gze -= getGyroZ();
+    if (_readRaw() == GY521_OK)
+    {
+      _axe -= getAccelX();
+      _aye -= getAccelY();
+      _aze -= getAccelZ();
+      _gxe -= getGyroX();
+      _gye -= getGyroY();
+      _gze -= getGyroZ();
+      samples++;
+    }
   }
 
+  if (samples == 0) return false;
+
   //  scale gyro calibration errors so read() should get all zero's on average.
-  float factor = _raw2dps / times;
+  float factor = _raw2dps / samples;
   gxe = _gxe * factor;
   gye = _gye * factor;
   gze = _gze * factor;
 
   //  scale accelerometer calibration errors so read() should get all zero's on average.
-  factor = _raw2g / times;
+  factor = _raw2g / samples;
   axe = _axe * factor;
   aye = _aye * factor;
   aze = _aze * factor;
@@ -118,6 +128,11 @@ void GY521::calibrate(uint16_t times, float angleX, float angleY, bool inverted)
   axe -= _gravx;
   aye -= _gravy;
   aze += inverted ? -_gravz : _gravz;
+
+  //  restore throttle state.
+  _throttle = oldThrottle;
+
+  return true;
 }
 
 

@@ -52,7 +52,7 @@ public:
   //  EXPERIMENTAL
   //  calibrate needs to be called to compensate for errors.
   //  must be called after setAccelSensitivity(as); and setGyroSensitivity(gs);
-  void     calibrate(uint16_t times, float angleX = 0, float angleY = 0, bool inverted = false);
+  bool     calibrate(uint16_t times, float angleX = 0, float angleY = 0, bool inverted = false);
 
   bool     wakeup();
   //  throttle to force delay between reads.
